@@ -3,6 +3,8 @@ import { MediaMatcher } from '@angular/cdk/layout';
 import { Subscriber } from 'src/app/models/subscriber';
 import { RSubscriber } from 'src/app/models/rsubscriber';
 import { FascadeService } from 'src/app/services/fascade.service';
+import { TermsOfService } from '../../constants/termsOfService.constants';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-main-dashboard',
@@ -17,6 +19,12 @@ export class MainDashboardComponent implements OnInit, OnDestroy {
 
   public userLoggedIn: Subscriber = {};
 
+  public termsOfService: string = TermsOfService.TERMS;
+
+  public currentEditPost!: number | undefined;
+
+  public userObservable: any;
+
   private _mobileQueryListener: () => void;
 
   constructor(changeDetectorRef: ChangeDetectorRef, 
@@ -28,10 +36,14 @@ export class MainDashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.fascadeService.getUserLoggedIn(new RSubscriber('V1', 'ALL')).subscribe(
+    this.userObservable = this.fascadeService.getUserLoggedIn(new RSubscriber('V1', 'ALL')).subscribe(
       (response: any) => {
-        if (this.userLoggedIn) {
+        if (response) {
           this.userLoggedIn = response.response.subscriber;
+          console.log(this.userLoggedIn.acceptedTermsOfService);
+          if (!this.userLoggedIn.acceptedTermsOfService) {
+            this.openModal('TOS');
+          }
         }
     },
     (error: any) => {
@@ -40,13 +52,15 @@ export class MainDashboardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.userObservable.unsubscribe();
     this.mobileQuery.removeListener(this._mobileQueryListener);
   }
 
-  public changeState(state: any): void {
+  public changeState(state: any, id?: number): void {
     if (typeof state === 'string') {
       this.currentState = state;
-    }    
+    }   
+    this.currentEditPost = id;
   }
 
   public logout(): void {
@@ -58,6 +72,19 @@ export class MainDashboardComponent implements OnInit, OnDestroy {
     (error: any) => {
       this.fascadeService.routeTo('/');
     });;
+  }
+
+  openModal(id: string) {
+    this.fascadeService.open(id);
+  }
+
+  closeModal(id: string, confirm: boolean) {
+    this.fascadeService.close(id);
+    if (confirm) {
+      this.fascadeService.acceptTerms().subscribe((data) => {
+         this.userLoggedIn = data.response.subscriber;
+      });
+    }
   }
 
 }
