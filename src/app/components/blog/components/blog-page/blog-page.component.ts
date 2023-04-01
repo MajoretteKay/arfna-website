@@ -16,6 +16,8 @@ export class BlogPageComponent implements OnInit {
   public posts: any[] = [];
 
   public loaded: boolean = false;
+  
+  @Output() public editMode: EventEmitter<number> = new EventEmitter<number>();
 
   public cols: number = 5;
   

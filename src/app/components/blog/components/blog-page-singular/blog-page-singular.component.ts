@@ -40,3 +40,4 @@ export class BlogPageSingularComponent implements OnInit {
       });
   }
 }
+

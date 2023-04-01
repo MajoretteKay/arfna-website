@@ -1,7 +1,5 @@
-import { HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable } from 'rxjs';
 import { Image } from 'src/app/models/image';
 import { Post } from 'src/app/models/post';
 import { PostService } from './post.service';
